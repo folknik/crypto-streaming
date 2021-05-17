@@ -1,0 +1,8 @@
+target/
+.idea
+build/
+*.imi
+*.iml
+out/
+.DS_Store
+*.txt
