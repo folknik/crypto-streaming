@@ -1,15 +1,17 @@
 package com.crypto.streaming.model;
 
+import java.math.BigInteger;
+
 public class Balance {
     private String address;
-    private Long balance;
+    private BigInteger balance;
     private Integer blockNumber;
 
     public String getAddress() {return address;}
     public String setAddress(String address) {return this.address = address;}
 
-    public Long getBalance() {return balance;}
-    public Long setBalance(Long balance) {return this.balance = balance;}
+    public BigInteger getBalance() {return balance;}
+    public BigInteger setBalance(BigInteger balance) {return this.balance = balance;}
 
     public Integer getBlockNumber() {return blockNumber;}
     public Integer setBlockNumber(Integer blockNumber) {return this.blockNumber = blockNumber;}

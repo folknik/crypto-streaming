@@ -3,7 +3,7 @@ package com.crypto.streaming.model;
 public class Transfer {
 	private String from;
 	private String to;
-	private Long value;
+	private String value;
 	private String valueExactBase36;
 	private Integer blockNumber;
 	private Long timestamp;
@@ -17,8 +17,8 @@ public class Transfer {
 	public String getTo(){return to;}
 	public String setTo(String to) {return this.to = to;}
 
-	public Long getValue(){return value;}
-	public Long setValue(Long value) {return this.value = value;}
+	public String getValue(){return value;}
+	public String setValue(String value) {return this.value = value;}
 
 	public String getValueExactBase36(){return valueExactBase36;}
 	public String setValueExactBase36(String valueExactBase36) {return this.valueExactBase36 = valueExactBase36;}

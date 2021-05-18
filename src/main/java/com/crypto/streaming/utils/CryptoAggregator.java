@@ -5,6 +5,7 @@ import com.crypto.streaming.model.Transfer;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,19 +31,19 @@ public class CryptoAggregator implements AggregateFunction<Transfer, Tuple3<Inte
 
 		String addressFrom = transfer.getFrom();
 		String addressTo = transfer.getTo();
-		Long balance = transfer.getValue();
+		BigInteger balance = new BigInteger(transfer.getValue());
 		Integer block = transfer.getBlockNumber();
 
 		if (allAddresses.contains(addressFrom)) {
 			if (allAddresses.contains(addressTo)) {
 				Optional<Balance> accountFrom = balanceList.stream().filter(item -> item.getAddress().equals(addressFrom)).findFirst();
 				newAccountFrom.setAddress(Objects.requireNonNull(accountFrom.orElse(null)).getAddress());
-				newAccountFrom.setBalance(accountFrom.orElse(null).getBalance() - balance);
+				newAccountFrom.setBalance(accountFrom.orElse(null).getBalance().subtract(balance));
 				newAccountFrom.setBlockNumber(block);
 
 				Optional<Balance> accountTo = balanceList.stream().filter(item -> item.getAddress().equals(addressTo)).findFirst();
 				newAccountTo.setAddress(Objects.requireNonNull(accountTo.orElse(null)).getAddress());
-				newAccountTo.setBalance(accountTo.orElse(null).getBalance() + balance);
+				newAccountTo.setBalance(accountTo.orElse(null).getBalance().add(balance));
 				newAccountTo.setBlockNumber(block);
 
 				accumulator.f0 = block;
@@ -53,7 +54,7 @@ public class CryptoAggregator implements AggregateFunction<Transfer, Tuple3<Inte
 			} else {
 				Optional<Balance> accountFrom = balanceList.stream().filter(item -> item.getAddress().equals(addressFrom)).findFirst();
 				newAccountFrom.setAddress(Objects.requireNonNull(accountFrom.orElse(null)).getAddress());
-				newAccountFrom.setBalance(accountFrom.orElse(null).getBalance() - balance);
+				newAccountFrom.setBalance(accountFrom.orElse(null).getBalance().subtract(balance));
 				newAccountFrom.setBlockNumber(block);
 
 				newAccountTo.setAddress(addressTo);
@@ -69,12 +70,12 @@ public class CryptoAggregator implements AggregateFunction<Transfer, Tuple3<Inte
 		} else {
 			if (allAddresses.contains(addressTo)) {
 				newAccountFrom.setAddress(addressFrom);
-				newAccountFrom.setBalance(-balance);
+				newAccountFrom.setBalance(balance.multiply(new BigInteger("-1")));
 				newAccountFrom.setBlockNumber(block);
 
 				Optional<Balance> accountTo = balanceList.stream().filter(item -> item.getAddress().equals(addressTo)).findFirst();
 				newAccountTo.setAddress(Objects.requireNonNull(accountTo.orElse(null)).getAddress());
-				newAccountTo.setBalance(accountTo.orElse(null).getBalance() + balance);
+				newAccountTo.setBalance(accountTo.orElse(null).getBalance().add(balance));
 				newAccountTo.setBlockNumber(block);
 
 				accumulator.f0 = block;
@@ -84,7 +85,7 @@ public class CryptoAggregator implements AggregateFunction<Transfer, Tuple3<Inte
 
 			} else {
 				newAccountFrom.setAddress(addressFrom);
-				newAccountFrom.setBalance(-balance);
+				newAccountFrom.setBalance(balance.multiply(new BigInteger("-1")));
 				newAccountFrom.setBlockNumber(block);
 
 				newAccountTo.setAddress(addressTo);

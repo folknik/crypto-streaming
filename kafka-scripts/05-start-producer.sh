@@ -1,3 +1,3 @@
 $KAFKA_HOME/bin/kafka-console-producer.sh \
-    --broker-list localhost:9092 \
-    --topic input-topic
+    --broker-list nl-sq-dpltkfk01.ao.nlmk:9092 \
+    --topic input-topic-test9
