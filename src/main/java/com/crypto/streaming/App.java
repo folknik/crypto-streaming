@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class App {
 
 	private static final Logger LOG = LoggerFactory.getLogger(App.class);
-	private static final int timeMinutes = 10;
+	private static final int timeSeconds = 5;
 	private static final String inputTopic = "input-topic";
 	private static final String outputTopic = "output-topic";
 
@@ -27,6 +27,7 @@ public class App {
 
 		Properties properties = new Properties();
 		properties.setProperty("bootstrap.servers", "localhost:9092");
+		properties.setProperty("auto.offset.reset", "earliest");
 		properties.setProperty("group.id", "crypto-consumer-group");
 		LOG.info("Properties set {}", properties);
 
@@ -42,7 +43,7 @@ public class App {
 		DataStream<String> aggregateStream = inputStream
 				.assignTimestampsAndWatermarks(new TimestampExtractor())
 				.keyBy(Transfer::getBlockNumber)
-				.timeWindow(Time.minutes(timeMinutes))
+				.timeWindow(Time.seconds(timeSeconds))
 				.aggregate(new CryptoAggregator());
 
 		FlinkKafkaProducer<String> kafkaProducer = new FlinkKafkaProducer<>(
