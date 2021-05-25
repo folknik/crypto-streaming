@@ -1,59 +1,40 @@
 package com.crypto.streaming;
 
-import java.util.Properties;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import com.crypto.streaming.model.Balance;
 import com.crypto.streaming.model.Transfer;
 import com.crypto.streaming.utils.*;
-import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import static com.crypto.streaming.utils.DataCollector.collectTransferData;
 
 public class App {
 
-	private static final Logger LOG = LoggerFactory.getLogger(App.class);
-	private static final int timeSeconds = 5;
-	private static final String inputTopic = "input-topic";
-	private static final String outputTopic = "output-topic";
-
+	private static final String path = "/eth_transfers_input.txt";
 
 	public static void main(String[] args) throws Exception {
 
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-		Properties properties = new Properties();
-		properties.setProperty("bootstrap.servers", "localhost:9092");
-		properties.setProperty("auto.offset.reset", "earliest");
-		properties.setProperty("group.id", "crypto-consumer-group");
-		LOG.info("Properties set {}", properties);
+		List<Tuple2<Integer, Transfer>> transferList = collectTransferData(path);
 
-		FlinkKafkaConsumer<Transfer> kafkaSource = new FlinkKafkaConsumer<>(
-				inputTopic,
-				new CryptoDeserializationSchema(),
-				properties);
-
-		DataStream<Transfer> inputStream = env.addSource(kafkaSource);
-
-		LOG.info("Stream created, {}", inputStream);
-
-		DataStream<String> aggregateStream = inputStream
-				.assignTimestampsAndWatermarks(new TimestampExtractor())
-				.keyBy(Transfer::getBlockNumber)
-				.timeWindow(Time.seconds(timeSeconds))
-				.aggregate(new CryptoAggregator());
-
-		FlinkKafkaProducer<String> kafkaProducer = new FlinkKafkaProducer<>(
-				outputTopic,
-				new CryptoSerializationSchema(outputTopic),
-				properties,
-				FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
-
-		aggregateStream.addSink(kafkaProducer);
-
+		env.fromCollection(transferList)
+				.keyBy(value -> value.f0)
+				.flatMap(new CryptoWindowAggregator())
+				.map(values -> {
+					List<String> jsonBalances = new ArrayList<>();
+					for(Balance value : values){
+						String strValue = new ObjectMapper().writeValueAsString(value);
+						jsonBalances.add(strValue);
+					}
+					return jsonBalances.stream().collect(Collectors.joining("\n", "", "\n"));
+				})
+				.print();
 		env.execute("CryptoTransactionApp");
 
 	}

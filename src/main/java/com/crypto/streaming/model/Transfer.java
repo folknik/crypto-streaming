@@ -10,6 +10,7 @@ public class Transfer {
 	private String transactionHash;
 	private String type;
 	private Integer primaryKey;
+	private Integer transactionPosition;
 
 	public String getFrom() {return from;}
 	public String setFrom(String from) {return this.from = from;}
@@ -37,4 +38,8 @@ public class Transfer {
 
 	public Integer getPrimaryKey(){return primaryKey;}
 	public Integer setPrimaryKey(Integer primaryKey) {return this.primaryKey = primaryKey;}
+
+	public Integer getTransactionPosition(){return transactionPosition;}
+	public Integer setTransactionPosition(Integer transactionPosition) {return this.transactionPosition = transactionPosition;}
+
 }
