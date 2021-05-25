@@ -26,7 +26,7 @@ public class CryptoWindowAggregator extends RichFlatMapFunction<Tuple2<Integer, 
         // get info from new transfer such as from, to, value, block
         String addressFrom = transfer.f1.getFrom();
         String addressTo = transfer.f1.getTo();
-        BigInteger value = new BigInteger(transfer.f1.getValue());
+        BigInteger value = transfer.f1.getValue();
         Integer block = transfer.f1.getBlockNumber();
 
         // create new sample of Balance class for addition them to collector
