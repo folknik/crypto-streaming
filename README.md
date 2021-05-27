@@ -19,5 +19,3 @@ $ docker cp target/stream-crypto-transactions-1.0.0.jar "${JM_CONTAINER}":/job.j
 $ docker cp eth_transfers_input.txt "${JM_CONTAINER}":/eth_transfers_input.txt 
 $ docker exec -t -i "${JM_CONTAINER}" flink run -d -c ${JOB_CLASS_NAME} /job.jar
 ```
-
-![sample](screenshot.png)
