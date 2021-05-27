@@ -40,9 +40,6 @@ public class CryptoWindowAggregator extends RichFlatMapFunction<Tuple2<Integer, 
                 out.collect(currentBalances.stream().filter(item -> (item.getBlockNumber().equals(finalMaxCurrentBlockNumber))).collect(Collectors.toList()));
             }
 
-            // create new sample of Balance class for addition them to collector
-            List<Balance> balancesToOut = new ArrayList<Balance>();
-
             Balance newBalanceFrom = new Balance();
             Balance newBalanceTo = new Balance();
 
@@ -76,15 +73,10 @@ public class CryptoWindowAggregator extends RichFlatMapFunction<Tuple2<Integer, 
 
             sum.update(currentBalances);
 
-            balancesToOut.add(newBalanceFrom);
-            balancesToOut.add(newBalanceTo);
-
         } else {
             int finalMaxCurrentBlockNumber = maxCurrentBlockNumber;
             out.collect(currentBalances.stream().filter(item -> (item.getBlockNumber().equals(finalMaxCurrentBlockNumber))).collect(Collectors.toList()));
         }
-
-
 
     }
 
