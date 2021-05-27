@@ -8,6 +8,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class DataCollector {
         List<Tuple2<Integer, Transfer>> data = new ArrayList<>();
         BufferedReader bufferedReader = new BufferedReader(new FileReader(pathToRead));
         String line = "";
+        int maxBlock = 0;
         while (line != null) {
             line = bufferedReader.readLine();
             if (line != null) {
@@ -28,10 +30,19 @@ public class DataCollector {
                     transfer = TransferMapper.mapRecord(transfer2);
                 } finally {
                     assert transfer != null;
-                    data.add(new Tuple2<>(transfer.getBlockNumber(), transfer));
+                    data.add(new Tuple2<>(1, transfer));
+                    if (transfer.getBlockNumber() > maxBlock) maxBlock = transfer.getBlockNumber();
                 }
             }
         }
+
+        Transfer finalElement = new Transfer();
+        finalElement.setFrom("final");
+        finalElement.setTo("final");
+        finalElement.setValue(BigInteger.valueOf(0));
+        finalElement.setBlockNumber(maxBlock + 1);
+        data.add(new Tuple2<>(1, finalElement));
+
         bufferedReader.close();
         return data;
     }

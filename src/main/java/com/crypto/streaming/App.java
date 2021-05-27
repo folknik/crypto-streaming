@@ -15,7 +15,7 @@ import static com.crypto.streaming.utils.DataCollector.collectTransferData;
 
 public class App {
 
-	private static final String path = "/eth_transfers_input.txt";
+	private static final String path = "/input.txt";
 
 	public static void main(String[] args) throws Exception {
 
@@ -24,7 +24,7 @@ public class App {
 		List<Tuple2<Integer, Transfer>> transferList = collectTransferData(path);
 
 		env.fromCollection(transferList)
-				.keyBy(value -> value.f0)
+				.keyBy(0)
 				.flatMap(new CryptoWindowAggregator())
 				.map(values -> {
 					List<String> jsonBalances = new ArrayList<>();
